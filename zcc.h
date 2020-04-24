@@ -17,18 +17,18 @@ typedef enum {
 // Token type
 typedef struct Token Token;
 struct Token {
-  TokenKind kind; // Token kind
-  Token *next;    // Next token
-  int val;        // If kind is TK_NUM, its value
-  char *str;      // Token string
-  int len;        // Token length
+  TokenKind kind;  // Token kind
+  Token *next;     // Next token
+  long val;        // If kind is TK_NUM, its value
+  char *str;       // Token string
+  int len;         // Token length
 };
 
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
 void expect(char *op);
-int expect_number(void);
+long expect_number(void);
 bool at_eof(void);
 Token *tokenize(void);
 
@@ -39,15 +39,16 @@ extern Token *token;
 // declaraation for parse.c
 //
 typedef enum {
-  ND_ADD, // +
-  ND_SUB, // -
-  ND_MUL, // *
-  ND_DIV, // /
-  ND_EQ,  // ==
-  ND_NE,  // !=
-  ND_LT,  // <
-  ND_LE,  // <=
-  ND_NUM, // Integer
+  ND_ADD,    // +
+  ND_SUB,    // -
+  ND_MUL,    // *
+  ND_DIV,    // /
+  ND_EQ,     // ==
+  ND_NE,     // !=
+  ND_LT,     // <
+  ND_LE,     // <=
+  ND_RETURN, // "return"
+  ND_NUM,    // Integer
 } NodeKind;
 
 // AST node type

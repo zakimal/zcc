@@ -47,10 +47,10 @@ void expect(char *op) {
 }
 
 // Ensure that the current token is TK_NUM.
-int expect_number() {
+long expect_number() {
   if (token->kind != TK_NUM)
     error_at(token->str, "expected a number");
-  int val = token->val;
+  long val = token->val;
   token = token->next;
   return val;
 }
@@ -60,7 +60,7 @@ bool at_eof() {
 }
 
 // Create a new token and add it as the next token of `cur`.
-Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
+static Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   Token *tok = calloc(1, sizeof(Token));
   tok->kind = kind;
   tok->str = str;
@@ -69,8 +69,16 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len) {
   return tok;
 }
 
-bool startswith(char *p, char *q) {
+static bool startswith(char *p, char *q) {
   return memcmp(p, q, strlen(q)) == 0;
+}
+
+static bool is_alphabet(char c) {
+  return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+static bool is_alphabet_or_number(char c) {
+  return is_alphabet(c) || ('0' <= c && c <= '9');
 }
 
 // Tokenize `user_input` and returns new tokens.
@@ -84,6 +92,13 @@ Token *tokenize() {
     // Skip whitespace characters.
     if (isspace(*p)) {
       p++;
+      continue;
+    }
+
+    // Keywords
+    if (startswith(p, "return") && !is_alphabet_or_number(p[6])) {
+      cur = new_token(TK_RESERVED, cur, p, 6);
+      p += 6;
       continue;
     }
 

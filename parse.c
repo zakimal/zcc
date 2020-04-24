@@ -19,20 +19,41 @@ Node *new_num(int val) {
   return node;
 }
 
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *primary();
+static Node *stmt(void);
+static Node *expr(void);
+static Node *equality(void);
+static Node *relational(void);
+static Node *add(void);
+static Node *mul(void);
+static Node *unary(void);
+static Node *primary(void);
+
+// program = stmt*
+Node *program(void) {
+  Node head = {};
+  Node *cur = &head;
+
+  while (!at_eof()) {
+    cur->next = stmt();
+    cur = cur->next;
+  }
+  return head.next;
+}
+
+// stmt = expr ";"
+static Node *stmt(void) {
+  Node *node = expr();
+  expect(";");
+  return node;
+}
 
 // expr = equality
-Node *expr() {
+static Node *expr() {
   return equality();
 }
 
 // equality = relational ("==" relational | "!=" relational)*
-Node *equality() {
+static Node *equality() {
   Node *node = relational();
 
   for (;;) {
@@ -46,7 +67,7 @@ Node *equality() {
 }
 
 // relational = add ("<" add | "<=" add | ">" add | ">=" add)*
-Node *relational() {
+static Node *relational() {
   Node *node = add();
 
   for (;;) {
@@ -64,7 +85,7 @@ Node *relational() {
 }
 
 // add = mul ("+" mul | "-" mul)*
-Node *add() {
+static Node *add() {
   Node *node = mul();
 
   for (;;) {
@@ -78,7 +99,7 @@ Node *add() {
 }
 
 // mul = unary ("*" unary | "/" unary)*
-Node *mul() {
+static Node *mul() {
   Node *node = unary();
 
   for (;;) {
@@ -92,7 +113,7 @@ Node *mul() {
 }
 
 // unary = ("+" | "-")? primary
-Node *unary() {
+static Node *unary() {
   if (consume("+"))
     return unary();
   if (consume("-"))
@@ -101,7 +122,7 @@ Node *unary() {
 }
 
 // primary = "(" expr ")" | num
-Node *primary() {
+static Node *primary() {
   if (consume("(")) {
     Node *node = expr();
     expect(")");

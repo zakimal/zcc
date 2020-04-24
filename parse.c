@@ -1,32 +1,39 @@
 #include "zcc.h"
 
-Node *new_node(NodeKind kind) {
+static Node *new_node(NodeKind kind) {
   Node *node = calloc(1, sizeof(Node));
   node->kind = kind;
   return node;
 }
 
-Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
+static Node *new_binary(NodeKind kind, Node *lhs, Node *rhs) {
   Node *node = new_node(kind);
   node->lhs = lhs;
   node->rhs = rhs;
   return node;
 }
 
-Node *new_unary(NodeKind kind, Node *expr) {
+static Node *new_unary(NodeKind kind, Node *expr) {
   Node *node = new_node(kind);
   node->lhs = expr;
   return node;
 }
 
-Node *new_num(int val) {
+static Node *new_num(int val) {
   Node *node = new_node(ND_NUM);
   node->val = val;
   return node;
 }
 
+static Node *new_var_node(char name) {
+  Node *node = new_node(ND_VAR);
+  node->name = name;
+  return node;
+}
+
 static Node *stmt(void);
 static Node *expr(void);
+static Node *assign(void);
 static Node *equality(void);
 static Node *relational(void);
 static Node *add(void);
@@ -60,9 +67,17 @@ static Node *stmt(void) {
   return node;
 }
 
-// expr = equality
+// expr = assign
 static Node *expr() {
-  return equality();
+  return assign();
+}
+
+// assign = equality ("=" assign)?
+static Node *assign() {
+  Node *node = equality();
+  if (consume("="))
+    node = new_binary(ND_ASSIGN, node, assign());
+  return node;
 }
 
 // equality = relational ("==" relational | "!=" relational)*
@@ -134,13 +149,17 @@ static Node *unary() {
   return primary();
 }
 
-// primary = "(" expr ")" | num
+// primary = "(" expr ")" | ident | num
 static Node *primary() {
   if (consume("(")) {
     Node *node = expr();
     expect(")");
     return node;
   }
+
+  Token *tok = consume_ident();
+  if (tok)
+    return new_var_node(*tok->str);
 
   return new_num(expect_number());
 }

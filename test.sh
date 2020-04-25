@@ -88,6 +88,7 @@ echo
 echo -e '\033[1;37mtesting blocks...\033[0;39m'
 assert 3 '{1; {2;} return 3;}'
 assert 55 'i=0; j=0; while(i<=10) {j=i+j; i=i+1;} return j;'
+assert 55 'sum=0; for (i=0; i<=10; i=i+1) {sum=sum+i;} return sum;'
 
 echo
 echo -e '\033[1;32mPASS!\033[0;39m'

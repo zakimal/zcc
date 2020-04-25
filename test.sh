@@ -80,4 +80,9 @@ echo -e '\033[1;37mtesting while statements...\033[0;39m'
 assert 10 'i=0; while(i<10) i=i+1; return i;'
 
 echo
+echo -e '\033[1;37mtesting for statements...\033[0;39m'
+assert 55 'i=0; j=0; for (i=0; i<=10; i=i+1) j=i+j; return j;'
+assert 3 'for (;;) return 3; return 5;'
+
+echo
 echo -e '\033[1;32mPASS!\033[0;39m'

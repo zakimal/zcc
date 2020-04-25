@@ -92,7 +92,7 @@ static bool is_alphabet_or_number(char c) {
 
 static char *starts_with_reserved(char *p) {
   // Keywords
-  static char *kw[] = {"return", "if", "else"};
+  static char *kw[] = {"return", "if", "else", "while"};
 
   for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++) {
     int len = strlen(kw[i]);

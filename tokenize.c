@@ -112,8 +112,11 @@ Token *tokenize() {
     }
 
     // Identifier
-    if ('a' <= *p && *p <= 'z') {
-      cur = new_token(TK_IDENT, cur, p++, 1);
+    if (is_alphabet(*p)) {
+      char *q = p++;
+      while (is_alphabet_or_number(*p))
+        p++;
+      cur = new_token(TK_IDENT, cur, q, p - q);
       continue;
     }
 

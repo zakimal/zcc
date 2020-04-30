@@ -3,6 +3,11 @@
 cat <<EOF | gcc -xc -c -o tmp2.o -
 int ret3() { return 3; }
 int ret5() { return 5; }
+int add(int x, int y) { return x+y; }
+int sub(int x, int y) { return x-y; }
+int add6(int a, int b, int c, int d, int e, int f) {
+  return a+b+c+d+e+f;
+}
 EOF
 
 assert() {
@@ -100,6 +105,9 @@ echo
 echo -e '\033[1;37mtesting function calls...\033[0;39m'
 assert 3 'return ret3();'
 assert 5 'return ret5();'
+assert 8 'return add(3, 5);'
+assert 2 'return sub(5, 3);'
+assert 21 'return add6(1,2,3,4,5,6);'
 
 echo
 echo -e '\033[1;32mPASS!\033[0;39m'

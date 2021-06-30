@@ -47,7 +47,7 @@ void expect(char op)
 {
     if (token->kind != TK_RESERVED || token->str[0] != op)
     {
-        error("error: expected '%c', but got other one", op);
+        error("error: expected '%c', but got '%c'", op, token->str[0]);
     }
     token = token->next;
 }
@@ -59,6 +59,7 @@ int expect_number()
         error("error: expected TK_NUM, but got other one");
     }
     int val = token->val;
+    token = token->next;
     return val;
 }
 

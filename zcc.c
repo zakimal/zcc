@@ -7,25 +7,26 @@
 
 typedef enum
 {
-    TK_RESERVED,
-    TK_NUM,
-    TK_EOF,
+    TK_RESERVED, // Keywords or punctuators
+    TK_NUM,      // Integer literals
+    TK_EOF,      // End-of-file markers
 } TokenKind;
 
+// Token type
 typedef struct Token Token;
-
 struct Token
 {
-    TokenKind kind;
-    Token *next;
-    int val;
-    char *str;
+    TokenKind kind; // Token kind
+    Token *next;    // Next token
+    int val;        // If kind is TK_NUM, its value
+    char *str;      // Token string
 };
 
-Token *token;
+Token *token; // Current token
 
-char *user_input;
+char *user_input; // Input program
 
+// Reports an error location and exit.
 void error_at(char *loc, char *fmt, ...)
 {
     va_list ap;
@@ -40,6 +41,7 @@ void error_at(char *loc, char *fmt, ...)
     exit(1);
 }
 
+// Consumes the current token if it matches `op`.
 bool consume(char op)
 {
     if (token->kind != TK_RESERVED || token->str[0] != op)
@@ -50,6 +52,7 @@ bool consume(char op)
     return true;
 }
 
+// Ensure that the current token is `op`.
 void expect(char op)
 {
     if (token->kind != TK_RESERVED || token->str[0] != op)
@@ -59,6 +62,7 @@ void expect(char op)
     token = token->next;
 }
 
+// Ensure that the current token is TK_NUM.
 int expect_number()
 {
     if (token->kind != TK_NUM)
@@ -75,6 +79,7 @@ bool at_eof()
     return token->kind == TK_EOF;
 }
 
+// Create a new token and add it as the next token of `cur`.
 Token *new_token(TokenKind kind, Token *cur, char *str)
 {
     Token *tok = calloc(1, sizeof(Token));
@@ -84,6 +89,7 @@ Token *new_token(TokenKind kind, Token *cur, char *str)
     return tok;
 }
 
+// Tokenize `user_input` and returns new tokens.
 Token *tokenize()
 {
     char *p = user_input;
@@ -93,6 +99,7 @@ Token *tokenize()
 
     while (*p)
     {
+        // Skip whitespace characters.
         if (isspace(*p))
         {
             p++;
@@ -106,6 +113,7 @@ Token *tokenize()
             continue;
         }
 
+        // Integer literal
         if (isdigit(*p))
         {
             cur = new_token(TK_NUM, cur, p);
@@ -138,14 +146,14 @@ typedef enum
     ND_NUM, // Number
 } NodeKind;
 
+// AST node type
 typedef struct Node Node;
-
 struct Node
 {
-    NodeKind kind;
-    Node *lhs;
-    Node *rhs;
-    int val;
+    NodeKind kind; // Node kind
+    Node *lhs;     // Left-hand side
+    Node *rhs;     // Right-hand side
+    int val;       // Used if kind == ND_NUM
 };
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
@@ -284,20 +292,21 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    // Tokenize and parse.
     user_input = argv[1];
-
-    // tokenize
     token = tokenize();
-
-    // parse
     Node *node = expr();
 
+    // Print out the first half of assembly.
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main:\n");
 
+    // Traverse the AST to emit assembly.
     gen(node);
 
+    // A result must be at the top of the stack, so pop it
+    // to RAX to make it a program exit code.
     printf("  pop rax\n");
     printf("  ret\n");
 

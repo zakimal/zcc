@@ -71,13 +71,30 @@ static Obj *new_lvar(char *name)
     return var;
 }
 
-// stmt = "return" expr ";" | "{" compound-stmt |expr-stmt
+// stmt = "return" expr ";"
+//      | "if" "(" expr ")" stmt ("else" stmt)?
+//      | "{" compound-stmt |expr-stmt
 static Node *stmt(Token **rest, Token *tok)
 {
     if (equal(tok, "return"))
     {
         Node *node = new_unary(ND_RETURN, expr(&tok, tok->next));
         *rest = skip(tok, ";");
+        return node;
+    }
+
+    if (equal(tok, "if"))
+    {
+        Node *node = new_node(ND_IF);
+        tok = skip(tok->next, "(");
+        node->cond = expr(&tok, tok);
+        tok = skip(tok, ")");
+        node->then = stmt(&tok, tok);
+        if (equal(tok, "else"))
+        {
+            node->els = stmt(&tok, tok->next);
+        }
+        *rest = tok;
         return node;
     }
 
@@ -261,7 +278,9 @@ static Node *unary(Token **rest, Token *tok)
     return primary(rest, tok);
 }
 
-// primary = "(" expr ")" | ident | num
+// primary = "(" expr ")"
+//         | ident
+//         | num
 static Node *primary(Token **rest, Token *tok)
 {
     if (equal(tok, "("))

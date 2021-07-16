@@ -81,6 +81,7 @@ typedef enum
     ND_IF,        // "if"
     ND_LOOP,      // "for" or "while"
     ND_BLOCK,     // { ... }
+    ND_FUNCALL,   // Function call
     ND_EXPR_STMT, // Expression statement
     ND_VAR,       // Variable
     ND_NUM,       // Integer
@@ -90,20 +91,21 @@ typedef enum
 typedef struct Node Node;
 struct Node
 {
-    NodeKind kind; // Node kind
-    Node *next;    // Next node
-    Type *ty;      // Type
-    Token *tok;    // Representative token
-    Node *lhs;     // Left-hand side
-    Node *rhs;     // Right-hand side
-    Node *cond;    // Condition
-    Node *then;    // Then
-    Node *els;     // Else
-    Node *body;    // Block
-    Node *init;    // Initialization
-    Node *inc;     // Increment
-    Obj *var;      // Used if kind == ND_VAR
-    int val;       // Used if kind == ND_NUM
+    NodeKind kind;  // Node kind
+    Node *next;     // Next node
+    Type *ty;       // Type
+    Token *tok;     // Representative token
+    Node *lhs;      // Left-hand side
+    Node *rhs;      // Right-hand side
+    Node *cond;     // Condition
+    Node *then;     // Then
+    Node *els;      // Else
+    Node *body;     // Block
+    char *funcname; // Function call
+    Node *init;     // Initialization
+    Node *inc;      // Increment
+    Obj *var;       // Used if kind == ND_VAR
+    int val;        // Used if kind == ND_NUM
 };
 
 Function *parse(Token *tok);

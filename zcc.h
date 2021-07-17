@@ -102,6 +102,7 @@ struct Node
     Node *els;      // Else
     Node *body;     // Block
     char *funcname; // Function call
+    Node *args;     // Arguments
     Node *init;     // Initialization
     Node *inc;      // Increment
     Obj *var;       // Used if kind == ND_VAR

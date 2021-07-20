@@ -49,6 +49,24 @@ static void gen_addr(Node *node)
     error_tok(node->tok, "not an lvalue");
 }
 
+// Load a value from where %rax is pointing to.
+static void load(Type *ty)
+{
+    if (ty->kind == TY_ARRAY)
+    {
+        return;
+    }
+
+    printf("  mov (%%rax), %%rax\n");
+}
+
+// Store %rax to an address that the stack top is pointing to.
+static void store(void)
+{
+    pop("%rdi");
+    printf("  mov %%rax, (%%rdi)\n");
+}
+
 // Generate code for a given node.
 static void gen_expr(Node *node)
 {
@@ -63,11 +81,11 @@ static void gen_expr(Node *node)
         return;
     case ND_VAR:
         gen_addr(node);
-        printf("  mov (%%rax), %%rax\n");
+        load(node->ty);
         return;
     case ND_DEREF:
         gen_expr(node->lhs);
-        printf("  mov (%%rax), %%rax\n");
+        load(node->ty);
         return;
     case ND_ADDR:
         gen_addr(node->lhs);
@@ -76,8 +94,7 @@ static void gen_expr(Node *node)
         gen_addr(node->lhs);
         push();
         gen_expr(node->rhs);
-        pop("%rdi");
-        printf("  mov %%rax, (%%rdi)\n");
+        store();
         return;
     case ND_FUNCALL:
     {
@@ -209,7 +226,7 @@ static void assign_lvar_offsets(Function *prog)
         int offset = 0;
         for (Obj *var = fn->locals; var; var = var->next)
         {
-            offset += 8;
+            offset += var->ty->size;
             var->offset = -offset;
         }
         fn->stack_size = align_to(offset, 16);

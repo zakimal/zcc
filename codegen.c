@@ -144,13 +144,21 @@ static void gen_expr(Node *node)
         printf("  cmp %%rdi, %%rax\n");
 
         if (node->kind == ND_EQ)
+        {
             printf("  sete %%al\n");
+        }
         else if (node->kind == ND_NE)
+        {
             printf("  setne %%al\n");
+        }
         else if (node->kind == ND_LT)
+        {
             printf("  setl %%al\n");
+        }
         else if (node->kind == ND_LE)
+        {
             printf("  setle %%al\n");
+        }
 
         printf("  movzb %%al, %%rax\n");
         return;
@@ -173,7 +181,9 @@ static void gen_stmt(Node *node)
         printf("  jmp .L.end.%d\n", c);
         printf(".L.else.%d:\n", c);
         if (node->els)
+        {
             gen_stmt(node->els);
+        }
         printf(".L.end.%d:\n", c);
         return;
     }

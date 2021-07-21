@@ -89,7 +89,9 @@ static char *get_ident(Token *tok)
 static int get_number(Token *tok)
 {
     if (tok->kind != TK_NUM)
+    {
         error_tok(tok, "expected a number");
+    }
     return tok->val;
 }
 
@@ -103,7 +105,9 @@ static Type *func_params(Token **rest, Token *tok, Type *ty)
     while (!equal(tok, ")"))
     {
         if (cur != &head)
+        {
             tok = skip(tok, ",");
+        }
         Type *basety = declspec(&tok, tok);
         Type *ty = declarator(&tok, tok, basety);
         cur = cur->next = copy_type(ty);
@@ -116,17 +120,20 @@ static Type *func_params(Token **rest, Token *tok, Type *ty)
 }
 
 // type-suffix = "(" func-params
-//             | "[" num "]"
+//             | "[" num "]" type-suffix
 //             | ε
 static Type *type_suffix(Token **rest, Token *tok, Type *ty)
 {
     if (equal(tok, "("))
+    {
         return func_params(rest, tok->next, ty);
+    }
 
     if (equal(tok, "["))
     {
         int sz = get_number(tok->next);
-        *rest = skip(tok->next->next, "]");
+        tok = skip(tok->next->next, "]");
+        ty = type_suffix(rest, tok, ty);
         return array_of(ty, sz);
     }
 
@@ -409,7 +416,7 @@ static Node *new_add(Node *lhs, Node *rhs, Token *tok)
     }
 
     // ptr + num
-    rhs = new_binary(ND_MUL, rhs, new_num(8, tok), tok);
+    rhs = new_binary(ND_MUL, rhs, new_num(lhs->ty->base->size, tok), tok);
     return new_binary(ND_ADD, lhs, rhs, tok);
 }
 

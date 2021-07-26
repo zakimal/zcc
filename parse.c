@@ -169,9 +169,15 @@ static Type *type_suffix(Token **rest, Token *tok, Type *ty)
     return ty;
 }
 
-// declarator = "*"* ident type-suffix
+// declspec = "char" | "int"
 static Type *declspec(Token **rest, Token *tok)
 {
+    if (equal(tok, "char"))
+    {
+        *rest = tok->next;
+        return ty_char;
+    }
+
     *rest = skip(tok, "int");
     return ty_int;
 }
@@ -228,6 +234,12 @@ static Node *declaration(Token **rest, Token *tok)
     node->body = head.next;
     *rest = tok->next;
     return node;
+}
+
+// Returns true if a given token represents a type.
+static bool is_typename(Token *tok)
+{
+    return equal(tok, "char") || equal(tok, "int");
 }
 
 // stmt = "return" expr ";"
@@ -308,7 +320,7 @@ static Node *compound_stmt(Token **rest, Token *tok)
     Node *cur = &head;
     while (!equal(tok, "}"))
     {
-        if (equal(tok, "int"))
+        if (is_typename(tok))
         {
             cur = cur->next = declaration(&tok, tok);
         }

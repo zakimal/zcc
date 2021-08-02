@@ -14,7 +14,7 @@ assert() {
     expected="$1"
     input="$2"
 
-    ./zcc "$input" > tmp.s
+    echo "$input" | ./zcc - > tmp.s || exit
     gcc -static -o tmp tmp.s tmp2.o
     ./tmp
     actual="$?"

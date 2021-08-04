@@ -9,6 +9,7 @@ $(OBJS): zcc.h
 
 test: zcc
 	./test.sh
+	./test-driver.sh
 
 clean:
 	rm -f zcc *.o *~ tmp*

@@ -93,6 +93,9 @@ void add_type(Node *node)
     case ND_VAR:
         node->ty = node->var->ty;
         return;
+    case ND_COMMA:
+        node->ty = node->rhs->ty;
+        return;
     case ND_ADDR:
         if (node->lhs->ty->kind == TY_ARRAY)
         {

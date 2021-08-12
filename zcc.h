@@ -147,6 +147,7 @@ struct Type
 {
     TypeKind kind;
     int size;
+    int align;
     Type *base;
     Token *name;
     int array_len;
@@ -178,3 +179,4 @@ void add_type(Node *node);
 /*** codegen.c ***/
 
 void codegen(Obj *prog, FILE *out);
+int align_to(int n, int align);

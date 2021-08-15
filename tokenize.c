@@ -127,19 +127,28 @@ static bool is_ident2(char c)
 static int from_hex(char c)
 {
     if ('0' <= c && c <= '9')
+    {
         return c - '0';
+    }
     if ('a' <= c && c <= 'f')
+    {
         return c - 'a' + 10;
+    }
     return c - 'A' + 10;
 }
 
 // Read a punctuator token from p and returns its length.
 static int read_punct(char *p)
 {
-    if (startswith(p, "==") || startswith(p, "!=") ||
-        startswith(p, "<=") || startswith(p, ">="))
+    static char *kw[] = {
+        "==", "!=", "<=", ">=", "->"};
+
+    for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
     {
-        return 2;
+        if (startswith(p, kw[i]))
+        {
+            return strlen(kw[i]);
+        }
     }
 
     return ispunct(*p) ? 1 : 0;

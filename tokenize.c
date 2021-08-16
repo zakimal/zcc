@@ -141,7 +141,12 @@ static int from_hex(char c)
 static int read_punct(char *p)
 {
     static char *kw[] = {
-        "==", "!=", "<=", ">=", "->"};
+        "==",
+        "!=",
+        "<=",
+        ">=",
+        "->",
+    };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
     {
@@ -166,6 +171,7 @@ static bool is_keyword(Token *tok)
         "sizeof",
         "char",
         "struct",
+        "union",
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)

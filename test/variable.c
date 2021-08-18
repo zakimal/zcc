@@ -52,12 +52,12 @@ int main()
                       foo123 + bar;
                   }));
 
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       int x;
                       sizeof(x);
                   }));
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       int x;
                       sizeof x;
@@ -67,42 +67,42 @@ int main()
                       int *x;
                       sizeof(x);
                   }));
-    ASSERT(32, (
+    ASSERT(16, (
                    {
                        int x[4];
                        sizeof(x);
                    }));
-    ASSERT(96, (
+    ASSERT(48, (
                    {
                        int x[3][4];
                        sizeof(x);
                    }));
-    ASSERT(32, (
+    ASSERT(16, (
                    {
                        int x[3][4];
                        sizeof(*x);
                    }));
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       int x[3][4];
                       sizeof(**x);
                   }));
-    ASSERT(9, (
+    ASSERT(5, (
                   {
                       int x[3][4];
                       sizeof(**x) + 1;
                   }));
-    ASSERT(9, (
+    ASSERT(5, (
                   {
                       int x[3][4];
                       sizeof **x + 1;
                   }));
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       int x[3][4];
                       sizeof(**x + 1);
                   }));
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       int x = 1;
                       sizeof(x = 2);
@@ -153,8 +153,8 @@ int main()
                       g2[3];
                   }));
 
-    ASSERT(8, sizeof(g1));
-    ASSERT(32, sizeof(g2));
+    ASSERT(4, sizeof(g1));
+    ASSERT(16, sizeof(g2));
 
     ASSERT(1, (
                   {
@@ -210,15 +210,15 @@ int main()
                       }
                       x;
                   }));
-    ASSERT(15, (
-                   {
-                       int x;
-                       int y;
-                       char z;
-                       char *a = &y;
-                       char *b = &z;
-                       b - a;
-                   }));
+    ASSERT(7, (
+                  {
+                      int x;
+                      int y;
+                      char z;
+                      char *a = &y;
+                      char *b = &z;
+                      b - a;
+                  }));
     ASSERT(1, (
                   {
                       int x;

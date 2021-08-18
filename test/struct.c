@@ -145,7 +145,7 @@ int main()
                       x.a.b;
                   }));
 
-    ASSERT(8, (
+    ASSERT(4, (
                   {
                       struct
                       {
@@ -153,24 +153,24 @@ int main()
                       } x;
                       sizeof(x);
                   }));
-    ASSERT(16, (
-                   {
-                       struct
-                       {
-                           int a;
-                           int b;
-                       } x;
-                       sizeof(x);
-                   }));
-    ASSERT(16, (
-                   {
-                       struct
-                       {
-                           int a, b;
-                       } x;
-                       sizeof(x);
-                   }));
-    ASSERT(24, (
+    ASSERT(8, (
+                  {
+                      struct
+                      {
+                          int a;
+                          int b;
+                      } x;
+                      sizeof(x);
+                  }));
+    ASSERT(8, (
+                  {
+                      struct
+                      {
+                          int a, b;
+                      } x;
+                      sizeof(x);
+                  }));
+    ASSERT(12, (
                    {
                        struct
                        {
@@ -178,7 +178,7 @@ int main()
                        } x;
                        sizeof(x);
                    }));
-    ASSERT(32, (
+    ASSERT(16, (
                    {
                        struct
                        {
@@ -186,7 +186,7 @@ int main()
                        } x[4];
                        sizeof(x);
                    }));
-    ASSERT(48, (
+    ASSERT(24, (
                    {
                        struct
                        {
@@ -203,24 +203,24 @@ int main()
                       } x;
                       sizeof(x);
                   }));
-    ASSERT(16, (
-                   {
-                       struct
-                       {
-                           char a;
-                           int b;
-                       } x;
-                       sizeof(x);
-                   }));
-    ASSERT(16, (
-                   {
-                       struct
-                       {
-                           int a;
-                           char b;
-                       } x;
-                       sizeof(x);
-                   }));
+    ASSERT(8, (
+                  {
+                      struct
+                      {
+                          char a;
+                          int b;
+                      } x;
+                      sizeof(x);
+                  }));
+    ASSERT(8, (
+                  {
+                      struct
+                      {
+                          int a;
+                          char b;
+                      } x;
+                      sizeof(x);
+                  }));
     ASSERT(0, (
                   {
                       struct
@@ -228,26 +228,26 @@ int main()
                       } x;
                       sizeof(x);
                   }));
-    ASSERT(16, (
-                   {
-                       struct t
-                       {
-                           int a;
-                           int b;
-                       } x;
-                       struct t y;
-                       sizeof(y);
-                   }));
-    ASSERT(16, (
-                   {
-                       struct t
-                       {
-                           int a;
-                           int b;
-                       };
-                       struct t y;
-                       sizeof(y);
-                   }));
+    ASSERT(8, (
+                  {
+                      struct t
+                      {
+                          int a;
+                          int b;
+                      } x;
+                      struct t y;
+                      sizeof(y);
+                  }));
+    ASSERT(8, (
+                  {
+                      struct t
+                      {
+                          int a;
+                          int b;
+                      };
+                      struct t y;
+                      sizeof(y);
+                  }));
     ASSERT(2, (
                   {
                       struct t
@@ -384,6 +384,26 @@ int main()
                       x.a = 5;
                       y = x;
                       y.a;
+                  }));
+    ASSERT(8, (
+                  {
+                      struct t
+                      {
+                          int a;
+                          int b;
+                      } x;
+                      struct t y;
+                      sizeof(y);
+                  }));
+    ASSERT(8, (
+                  {
+                      struct t
+                      {
+                          int a;
+                          int b;
+                      };
+                      struct t y;
+                      sizeof(y);
                   }));
 
     return 0;

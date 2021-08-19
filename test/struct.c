@@ -405,6 +405,15 @@ int main()
                       struct t y;
                       sizeof(y);
                   }));
+    ASSERT(16, (
+                   {
+                       struct
+                       {
+                           char a;
+                           long b;
+                       } x;
+                       sizeof(x);
+                   }));
 
     return 0;
 }

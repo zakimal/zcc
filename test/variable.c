@@ -228,6 +228,11 @@ int main()
                       char *b = &z;
                       b - a;
                   }));
+    ASSERT(8, (
+                  {
+                      long x;
+                      sizeof(x);
+                  }));
 
     return 0;
 }

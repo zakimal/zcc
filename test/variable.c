@@ -233,6 +233,11 @@ int main()
                       long x;
                       sizeof(x);
                   }));
+    ASSERT(2, (
+                  {
+                      short x;
+                      sizeof(x);
+                  }));
 
     return 0;
 }

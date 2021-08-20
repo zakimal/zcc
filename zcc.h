@@ -142,6 +142,7 @@ typedef enum
     TY_CHAR,
     TY_INT,
     TY_LONG,
+    TY_SHORT,
     TY_PTR,
     TY_FUNC,
     TY_ARRAY,
@@ -175,6 +176,7 @@ struct Member
 extern Type *ty_char;
 extern Type *ty_int;
 extern Type *ty_long;
+extern Type *ty_short;
 
 bool is_integer(Type *ty);
 Type *copy_type(Type *ty);

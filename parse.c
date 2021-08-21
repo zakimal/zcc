@@ -299,12 +299,22 @@ static Type *declspec(Token **rest, Token *tok)
     error_tok(tok, "typename expected");
 }
 
-// declarator = "*"* ident
+// declarator = "*"* ("(" ident ")" | "(" declarator ")" | ident) type-suffix
 static Type *declarator(Token **rest, Token *tok, Type *ty)
 {
     while (consume(&tok, tok, "*"))
     {
         ty = pointer_to(ty);
+    }
+
+    if (equal(tok, "("))
+    {
+        Token *start = tok;
+        Type ignore = {};
+        declarator(&tok, tok->next, &ignore);
+        tok = skip(tok, ")");
+        ty = type_suffix(rest, tok, ty);
+        return declarator(&tok, start->next, ty);
     }
 
     if (tok->kind != TK_IDENT)

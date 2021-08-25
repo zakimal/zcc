@@ -33,5 +33,11 @@ int main()
                       sizeof(x);
                   }));
 
+    ASSERT(8, (
+                  {
+                      long long x;
+                      sizeof(x);
+                  }));
+
     return 0;
 }

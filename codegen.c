@@ -321,7 +321,7 @@ static void gen_expr(Node *node)
 
 static void gen_stmt(Node *node)
 {
-    println(" .loc 1 %d", node->tok->line_no);
+    println("  .loc 1 %d", node->tok->line_no);
     switch (node->kind)
     {
     case ND_IF:

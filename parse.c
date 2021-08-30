@@ -6,7 +6,8 @@ struct VarScope
 {
     VarScope *next;
     char *name;
-    Obj *var;
+    int depth;
+    Var *var;
     Type *type_def;
 };
 
@@ -16,6 +17,7 @@ struct TagScope
 {
     TagScope *next;
     char *name;
+    int depth;
     Type *ty;
 };
 
@@ -36,10 +38,12 @@ typedef struct
 
 // All local variable instances created during parsing are
 // accumulated to this list.
-static Obj *locals;
-static Obj *globals;
+static Var *locals;
+static Var *globals;
 
 static Scope *scope = &(Scope){};
+static int scope_depth;
+static Var *current_fn;
 
 static bool is_typename(Token *tok);
 static Type *declspec(Token **rest, Token *tok, VarAttr *attr);
@@ -67,11 +71,13 @@ static void enter_scope(void)
     Scope *sc = calloc(1, sizeof(Scope));
     sc->next = scope;
     scope = sc;
+    scope_depth++;
 }
 
 static void leave_scope(void)
 {
     scope = scope->next;
+    scope_depth--;
 }
 
 // Find a variable by name.
@@ -143,7 +149,7 @@ static Node *new_long(int64_t val, Token *tok)
     return node;
 }
 
-static Node *new_var_node(Obj *var, Token *tok)
+static Node *new_var_node(Var *var, Token *tok)
 {
     Node *node = new_node(ND_VAR, tok);
     node->var = var;
@@ -166,32 +172,33 @@ static VarScope *push_scope(char *name)
 {
     VarScope *sc = calloc(1, sizeof(VarScope));
     sc->name = name;
+    sc->depth = scope_depth;
     sc->next = scope->vars;
     scope->vars = sc;
     return sc;
 }
 
-static Obj *new_var(char *name, Type *ty)
+static Var *new_var(char *name, Type *ty)
 {
-    Obj *var = calloc(1, sizeof(Obj));
+    Var *var = calloc(1, sizeof(Var));
     var->name = name;
     var->ty = ty;
     push_scope(name)->var = var;
     return var;
 }
 
-static Obj *new_lvar(char *name, Type *ty)
+static Var *new_lvar(char *name, Type *ty)
 {
-    Obj *var = new_var(name, ty);
+    Var *var = new_var(name, ty);
     var->is_local = true;
     var->next = locals;
     locals = var;
     return var;
 }
 
-static Obj *new_gvar(char *name, Type *ty)
+static Var *new_gvar(char *name, Type *ty)
 {
-    Obj *var = new_var(name, ty);
+    Var *var = new_var(name, ty);
     var->next = globals;
     globals = var;
     return var;
@@ -203,14 +210,14 @@ static char *new_unique_name(void)
     return format(".L..%d", id++);
 }
 
-static Obj *new_anon_gvar(Type *ty)
+static Var *new_anon_gvar(Type *ty)
 {
     return new_gvar(new_unique_name(), ty);
 }
 
-static Obj *new_string_literal(char *p, Type *ty)
+static Var *new_string_literal(char *p, Type *ty)
 {
-    Obj *var = new_anon_gvar(ty);
+    Var *var = new_anon_gvar(ty);
     var->init_data = p;
     return var;
 }
@@ -250,6 +257,7 @@ static void push_tag_scope(Token *tok, Type *ty)
 {
     TagScope *sc = calloc(1, sizeof(TagScope));
     sc->name = strndup(tok->loc, tok->len);
+    sc->depth = scope_depth;
     sc->ty = ty;
     sc->next = scope->tags;
     scope->tags = sc;
@@ -494,7 +502,7 @@ static Node *declaration(Token **rest, Token *tok, Type *basety)
         {
             error_tok(tok, "variable declared void");
         }
-        Obj *var = new_lvar(get_ident(ty->name), ty);
+        Var *var = new_lvar(get_ident(ty->name), ty);
 
         if (!equal(tok, "="))
         {
@@ -547,8 +555,10 @@ static Node *stmt(Token **rest, Token *tok)
     if (equal(tok, "return"))
     {
         Node *node = new_node(ND_RETURN, tok);
-        node->lhs = expr(&tok, tok->next);
+        Node *exp = expr(&tok, tok->next);
         *rest = skip(tok, ";");
+        add_type(exp);
+        node->lhs = new_cast(exp, current_fn->ty->return_ty);
         return node;
     }
 
@@ -1172,7 +1182,7 @@ static Node *primary(Token **rest, Token *tok)
 
     if (tok->kind == TK_STR)
     {
-        Obj *var = new_string_literal(tok->str, tok->ty);
+        Var *var = new_string_literal(tok->str, tok->ty);
         *rest = tok->next;
         return new_var_node(var, tok);
     }
@@ -1218,7 +1228,7 @@ static Token *function(Token *tok, Type *basety)
 {
     Type *ty = declarator(&tok, tok, basety);
 
-    Obj *fn = new_gvar(get_ident(ty->name), ty);
+    Var *fn = new_gvar(get_ident(ty->name), ty);
     fn->is_function = true;
     fn->is_definition = !consume(&tok, tok, ";");
 
@@ -1227,6 +1237,7 @@ static Token *function(Token *tok, Type *basety)
         return tok;
     }
 
+    current_fn = fn;
     locals = NULL;
     enter_scope();
     create_param_lvars(ty->params);
@@ -1270,7 +1281,7 @@ static bool is_function(Token *tok)
 }
 
 // program = (typedef | function-definition | global-variable)*
-Obj *parse(Token *tok)
+Var *parse(Token *tok)
 {
     globals = NULL;
 

@@ -59,10 +59,10 @@ Token *tokenize_file(char *filename);
 /*** parse.c ***/
 
 // Variable or function
-typedef struct Obj Obj;
-struct Obj
+typedef struct Var Var;
+struct Var
 {
-    Obj *next;
+    Var *next;
     char *name;    // Variable name
     Type *ty;      // Type
     bool is_local; // local or global/function
@@ -78,9 +78,9 @@ struct Obj
     char *init_data;
 
     // Function
-    Obj *params;
+    Var *params;
     Node *body;
-    Obj *locals;
+    Var *locals;
     int stack_size;
 };
 
@@ -132,12 +132,12 @@ struct Node
     Node *args;     // Arguments
     Node *init;     // Initialization
     Node *inc;      // Increment
-    Obj *var;       // Used if kind == ND_VAR
+    Var *var;       // Used if kind == ND_VAR
     int64_t val;    // Used if kind == ND_NUM
 };
 
 Node *new_cast(Node *expr, Type *ty);
-Obj *parse(Token *tok);
+Var *parse(Token *tok);
 
 /*** type.c ***/
 
@@ -193,5 +193,5 @@ void add_type(Node *node);
 
 /*** codegen.c ***/
 
-void codegen(Obj *prog, FILE *out);
+void codegen(Var *prog, FILE *out);
 int align_to(int n, int align);

@@ -6,7 +6,7 @@ static char *argreg8[] = {"%dil", "%sil", "%dl", "%cl", "%r8b", "%r9b"};
 static char *argreg16[] = {"%di", "%si", "%dx", "%cx", "%r8w", "%r9w"};
 static char *argreg32[] = {"%edi", "%esi", "%edx", "%ecx", "%r8d", "%r9d"};
 static char *argreg64[] = {"%rdi", "%rsi", "%rdx", "%rcx", "%r8", "%r9"};
-static Obj *current_fn;
+static Var *current_fn;
 
 static void gen_expr(Node *node);
 static void gen_stmt(Node *node);
@@ -382,16 +382,16 @@ static void gen_stmt(Node *node)
 }
 
 // Assign offsets to local variables
-static void assign_lvar_offsets(Obj *prog)
+static void assign_lvar_offsets(Var *prog)
 {
-    for (Obj *fn = prog; fn; fn = fn->next)
+    for (Var *fn = prog; fn; fn = fn->next)
     {
         if (!fn->is_function)
         {
             continue;
         }
         int offset = 0;
-        for (Obj *var = fn->locals; var; var = var->next)
+        for (Var *var = fn->locals; var; var = var->next)
         {
             offset += var->ty->size;
             offset = align_to(offset, var->ty->align);
@@ -401,9 +401,9 @@ static void assign_lvar_offsets(Obj *prog)
     }
 }
 
-static void emit_data(Obj *prog)
+static void emit_data(Var *prog)
 {
-    for (Obj *var = prog; var; var = var->next)
+    for (Var *var = prog; var; var = var->next)
     {
         if (var->is_function)
         {
@@ -448,9 +448,9 @@ static void store_gp(int r, int offset, int sz)
     unreachable();
 }
 
-static void emit_text(Obj *prog)
+static void emit_text(Var *prog)
 {
-    for (Obj *fn = prog; fn; fn = fn->next)
+    for (Var *fn = prog; fn; fn = fn->next)
     {
         if (!fn->is_function || !fn->is_definition)
         {
@@ -469,7 +469,7 @@ static void emit_text(Obj *prog)
 
         // Save passed-by-register arguments to the stack
         int i = 0;
-        for (Obj *var = fn->params; var; var = var->next)
+        for (Var *var = fn->params; var; var = var->next)
         {
             store_gp(i++, var->offset, var->ty->size);
         }
@@ -486,7 +486,7 @@ static void emit_text(Obj *prog)
     }
 }
 
-void codegen(Obj *prog, FILE *out)
+void codegen(Var *prog, FILE *out)
 {
     output_file = out;
     assign_lvar_offsets(prog);

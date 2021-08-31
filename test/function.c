@@ -60,6 +60,11 @@ char int_to_char(int x)
     return x;
 }
 
+int div_long(long a, long b)
+{
+    return a / b;
+}
+
 int main()
 {
     ASSERT(3, ret3());
@@ -82,6 +87,7 @@ int main()
 
     ASSERT(3, *g1_ptr());
     ASSERT(5, int_to_char(261)); // 0b1_00000101
+    ASSERT(-5, div_long(-10, 2));
 
     return 0;
 }

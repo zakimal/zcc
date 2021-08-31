@@ -129,6 +129,7 @@ struct Node
     Node *body;     // Block or statement expression
     Member *member; // Struct member access
     char *funcname; // Function call
+    Type *func_ty;  // Function (argument) type
     Node *args;     // Arguments
     Node *init;     // Initialization
     Node *inc;      // Increment

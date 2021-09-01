@@ -317,11 +317,12 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr)
     enum
     {
         VOID = 1 << 0,
-        CHAR = 1 << 2,
-        SHORT = 1 << 4,
-        INT = 1 << 6,
-        LONG = 1 << 8,
-        OTHER = 1 << 10,
+        BOOL = 1 << 2,
+        CHAR = 1 << 4,
+        SHORT = 1 << 6,
+        INT = 1 << 8,
+        LONG = 1 << 10,
+        OTHER = 1 << 12,
     };
 
     Type *ty = ty_int;
@@ -373,6 +374,10 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr)
         {
             counter += VOID;
         }
+        else if (equal(tok, "_Bool"))
+        {
+            counter += BOOL;
+        }
         else if (equal(tok, "char"))
         {
             counter += CHAR;
@@ -398,6 +403,9 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr)
         {
         case VOID:
             ty = ty_void;
+            break;
+        case BOOL:
+            ty = ty_bool;
             break;
         case CHAR:
             ty = ty_char;
@@ -533,6 +541,7 @@ static bool is_typename(Token *tok)
         "struct",
         "union",
         "typedef",
+        "_Bool",
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)

@@ -106,12 +106,13 @@ bool consume(Token **rest, Token *tok, char *str)
 }
 
 // Create a new token.
-static Token *new_token(TokenKind kind, char *start, char *end)
+static Token *new_token(TokenKind kind, Token *cur, char *str, int len)
 {
     Token *tok = calloc(1, sizeof(Token));
     tok->kind = kind;
-    tok->loc = start;
-    tok->len = end - start;
+    tok->loc = str;
+    tok->len = len;
+    cur->next = tok;
     return tok;
 }
 
@@ -272,7 +273,7 @@ static char *string_literal_end(char *p)
     return p;
 }
 
-static Token *read_string_literal(char *start)
+static Token *read_string_literal(Token *cur, char *start)
 {
     char *end = string_literal_end(start + 1);
     char *buf = calloc(1, end - start);
@@ -290,9 +291,38 @@ static Token *read_string_literal(char *start)
         }
     }
 
-    Token *tok = new_token(TK_STR, start, end + 1);
+    Token *tok = new_token(TK_STR, cur, start, end - start + 1);
     tok->ty = array_of(ty_char, len + 1);
     tok->str = buf;
+    return tok;
+}
+
+static Token *read_char_literal(Token *cur, char *start)
+{
+    char *p = start + 1;
+    if (*p == '\0')
+    {
+        error_at(start, "unclosed char literal");
+    }
+
+    char c;
+    if (*p == '\\')
+    {
+        c = read_escaped_char(&p, p + 1);
+    }
+    else
+    {
+        c = *p++;
+    }
+
+    char *end = strchr(p, '\'');
+    if (!end)
+    {
+        error_at(p, "unclosed char literal");
+    }
+
+    Token *tok = new_token(TK_NUM, cur, start, end - start + 1);
+    tok->val = c;
     return tok;
 }
 
@@ -370,7 +400,7 @@ static Token *tokenize(char *filename, char *p)
         // Numeric literal
         if (isdigit(*p))
         {
-            cur = cur->next = new_token(TK_NUM, p, p);
+            cur = new_token(TK_NUM, cur, p, 0);
             char *q = p;
             cur->val = strtoul(p, &p, 10);
             cur->len = p - q;
@@ -380,7 +410,15 @@ static Token *tokenize(char *filename, char *p)
         // String literal
         if (*p == '"')
         {
-            cur = cur->next = read_string_literal(p);
+            cur = cur->next = read_string_literal(cur, p);
+            p += cur->len;
+            continue;
+        }
+
+        // Character literal
+        if (*p == '\'')
+        {
+            cur = read_char_literal(cur, p);
             p += cur->len;
             continue;
         }
@@ -388,12 +426,12 @@ static Token *tokenize(char *filename, char *p)
         // Identifier or keyword
         if (is_ident1(*p))
         {
-            char *start = p;
+            char *q = p;
             do
             {
                 p++;
             } while (is_ident2(*p));
-            cur = cur->next = new_token(TK_IDENT, start, p);
+            cur = new_token(TK_IDENT, cur, q, p - q);
             continue;
         }
 
@@ -401,7 +439,7 @@ static Token *tokenize(char *filename, char *p)
         int punct_len = read_punct(p);
         if (punct_len)
         {
-            cur = cur->next = new_token(TK_PUNCT, p, p + punct_len);
+            cur = cur->next = new_token(TK_PUNCT, cur, p, punct_len);
             p += cur->len;
             continue;
         }
@@ -409,7 +447,7 @@ static Token *tokenize(char *filename, char *p)
         error_at(p, "invalid token");
     }
 
-    cur = cur->next = new_token(TK_EOF, p, p);
+    cur = cur->next = new_token(TK_EOF, cur, p, 0);
     add_line_numbers(head.next);
     convert_keywords(head.next);
     return head.next;

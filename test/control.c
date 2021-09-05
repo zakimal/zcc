@@ -108,5 +108,22 @@ int main()
                       (i = 5, j) = 6;
                       j;
                   }));
+
+    ASSERT(55, (
+                   {
+                       int j = 0;
+                       for (int i = 0; i <= 10; i = i + 1)
+                           j = j + i;
+                       j;
+                   }));
+    ASSERT(3, (
+                  {
+                      int i = 3;
+                      int j = 0;
+                      for (int i = 0; i <= 10; i = i + 1)
+                          j = j + i;
+                      i;
+                  }));
+
     return 0;
 }

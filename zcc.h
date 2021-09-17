@@ -115,6 +115,8 @@ typedef enum
     ND_IF,        // "if"
     ND_LOOP,      // "for" or "while"
     ND_BLOCK,     // { ... }
+    ND_GOTO,      // "goto"
+    ND_LABEL,     // Labeled statement
     ND_FUNCALL,   // Function call
     ND_EXPR_STMT, // Expression statement
     ND_STMT_EXPR, // Statement expression
@@ -127,24 +129,27 @@ typedef enum
 typedef struct Node Node;
 struct Node
 {
-    NodeKind kind;  // Node kind
-    Node *next;     // Next node
-    Type *ty;       // Type
-    Token *tok;     // Representative token
-    Node *lhs;      // Left-hand side
-    Node *rhs;      // Right-hand side
-    Node *cond;     // Condition
-    Node *then;     // Then
-    Node *els;      // Else
-    Node *body;     // Block or statement expression
-    Member *member; // Struct member access
-    char *funcname; // Function call
-    Type *func_ty;  // Function (argument) type
-    Node *args;     // Arguments
-    Node *init;     // Initialization
-    Node *inc;      // Increment
-    Var *var;       // Used if kind == ND_VAR
-    int64_t val;    // Used if kind == ND_NUM
+    NodeKind kind;      // Node kind
+    Node *next;         // Next node
+    Type *ty;           // Type
+    Token *tok;         // Representative token
+    Node *lhs;          // Left-hand side
+    Node *rhs;          // Right-hand side
+    Node *cond;         // Condition
+    Node *then;         // Then
+    Node *els;          // Else
+    Node *body;         // Block or statement expression
+    Member *member;     // Struct member access
+    char *funcname;     // Function call
+    Type *func_ty;      // Function (argument) type
+    Node *args;         // Arguments
+    Node *init;         // Initialization
+    Node *inc;          // Increment
+    char *label;        // Label in C code
+    char *unique_label; // Label in assemble code
+    Node *goto_next;    // Goto statement
+    Var *var;           // Used if kind == ND_VAR
+    int64_t val;        // Used if kind == ND_NUM
 };
 
 Node *new_cast(Node *expr, Type *ty);

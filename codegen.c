@@ -433,7 +433,7 @@ static void gen_stmt(Node *node)
         {
             gen_expr(node->cond);
             println("  cmp $0, %%rax");
-            println("  je .L.end.%d", c);
+            println("  je %s", node->brk_label);
         }
         gen_stmt(node->then);
         if (node->inc)
@@ -441,7 +441,7 @@ static void gen_stmt(Node *node)
             gen_expr(node->inc);
         }
         println("  jmp .L.begin.%d", c);
-        println(".L.end.%d:", c);
+        println("%s:", node->brk_label);
         return;
     }
     case ND_BLOCK:

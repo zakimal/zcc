@@ -145,6 +145,7 @@ struct Node
     Node *args;         // Arguments
     Node *init;         // Initialization
     Node *inc;          // Increment
+    char *brk_label;    // Break
     char *label;        // Label in C code
     char *unique_label; // Label in assemble code
     Node *goto_next;    // Goto statement

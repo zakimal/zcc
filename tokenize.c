@@ -201,6 +201,7 @@ static bool is_keyword(Token *tok)
         "enum",
         "static",
         "goto",
+        "break",
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)

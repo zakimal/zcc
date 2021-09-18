@@ -171,5 +171,13 @@ int main()
                       i;
                   }));
 
+    ASSERT(1, (
+                  {
+                      typedef int foo;
+                      goto foo;
+                  foo:;
+                      1;
+                  }));
+
     return 0;
 }

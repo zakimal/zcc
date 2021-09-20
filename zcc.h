@@ -114,6 +114,8 @@ typedef enum
     ND_RETURN,    // "return"
     ND_IF,        // "if"
     ND_LOOP,      // "for" or "while"
+    ND_SWITCH,    // "switch"
+    ND_CASE,      // "case"
     ND_BLOCK,     // { ... }
     ND_GOTO,      // "goto"
     ND_LABEL,     // Labeled statement
@@ -129,29 +131,31 @@ typedef enum
 typedef struct Node Node;
 struct Node
 {
-    NodeKind kind;   // Node kind
-    Node *next;      // Next node
-    Type *ty;        // Type
-    Token *tok;      // Representative token
-    Node *lhs;       // Left-hand side
-    Node *rhs;       // Right-hand side
-    Node *cond;      // Condition
-    Node *then;      // Then
-    Node *els;       // Else
-    Node *body;      // Block or statement expression
-    Member *member;  // Struct member access
-    char *funcname;  // Function call
-    Type *func_ty;   // Function (argument) type
-    Node *args;      // Arguments
-    Node *init;      // Initialization
-    Node *inc;       // Increment
-    char *brk_label; // Break
-    char *cont_label;
+    NodeKind kind;      // Node kind
+    Node *next;         // Next node
+    Type *ty;           // Type
+    Token *tok;         // Representative token
+    Node *lhs;          // Left-hand side
+    Node *rhs;          // Right-hand side
+    Node *cond;         // Condition
+    Node *then;         // Then
+    Node *els;          // Else
+    Node *body;         // Block or statement expression
+    Member *member;     // Struct member access
+    char *funcname;     // Function call
+    Type *func_ty;      // Function (argument) type
+    Node *args;         // Arguments
+    Node *init;         // Initialization
+    Node *inc;          // Increment
+    char *brk_label;    // Break
+    char *cont_label;   // Continue
     char *label;        // Label in C code
     char *unique_label; // Label in assemble code
     Node *goto_next;    // Goto statement
-    Var *var;           // Used if kind == ND_VAR
-    int64_t val;        // Used if kind == ND_NUM
+    Node *case_next;    // Switch-cases
+    Node *default_case; // Default
+    Var *var;           // Variable, Used if kind == ND_VAR
+    int64_t val;        // Numeric literal, Used if kind == ND_NUM
 };
 
 Node *new_cast(Node *expr, Type *ty);

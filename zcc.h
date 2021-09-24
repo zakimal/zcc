@@ -89,6 +89,7 @@ struct Var
 // AST node
 typedef enum
 {
+    ND_NULL_EXPR, // Do nothing
     ND_ADD,       // +
     ND_SUB,       // -
     ND_MUL,       // *

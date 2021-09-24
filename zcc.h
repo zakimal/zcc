@@ -129,6 +129,7 @@ typedef enum
     ND_VAR,       // Variable
     ND_NUM,       // Integer
     ND_CAST,      // Type cast
+    ND_MEMZERO,   // Zero-clear a stack variable
 } NodeKind;
 
 // AST node type

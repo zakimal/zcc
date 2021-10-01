@@ -310,6 +310,55 @@ int main()
                       T y = x;
                       y.a;
                   }));
+    ASSERT(4, (
+                  {
+                      union
+                      {
+                          int a;
+                          char b[4];
+                      } x = {0x01020304};
+                      x.b[0];
+                  }));
+    ASSERT(3, (
+                  {
+                      union
+                      {
+                          int a;
+                          char b[4];
+                      } x = {0x01020304};
+                      x.b[1];
+                  }));
+    ASSERT(2, (
+                  {
+                      union
+                      {
+                          int a;
+                          char b[4];
+                      } x = {0x01020304};
+                      x.b[2];
+                  }));
+    ASSERT(1, (
+                  {
+                      union
+                      {
+                          int a;
+                          char b[4];
+                      } x = {0x01020304};
+                      x.b[3];
+                  }));
+
+    ASSERT(0x01020304, (
+                           {
+                               union
+                               {
+                                   struct
+                                   {
+                                       char a, b, c, d;
+                                   } e;
+                                   int f;
+                               } x = {{4, 3, 2, 1}};
+                               x.f;
+                           }));
 
     return 0;
 }

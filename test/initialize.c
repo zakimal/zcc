@@ -60,6 +60,8 @@ struct
 
 char g43[][4] = {'f', 'o', 'o', 0, 'b', 'a', 'r', 0};
 
+char *g44 = {"foo"};
+
 int main()
 {
     ASSERT(1, (
@@ -481,6 +483,8 @@ int main()
 
     ASSERT(0, str_cmp(g43[0], "foo"));
     ASSERT(0, str_cmp(g43[1], "bar"));
+
+    ASSERT(0, str_cmp(g44, "foo"));
 
     return 0;
 }

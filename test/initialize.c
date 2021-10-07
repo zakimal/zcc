@@ -486,5 +486,37 @@ int main()
 
     ASSERT(0, str_cmp(g44, "foo"));
 
+    ASSERT(3, (
+                  {
+                      int a[] = {
+                          1,
+                          2,
+                          3,
+                      };
+                      a[2];
+                  }));
+    ASSERT(1, (
+                  {
+                      struct
+                      {
+                          int a, b, c;
+                      } x = {
+                          1,
+                          2,
+                          3,
+                      };
+                      x.a;
+                  }));
+    ASSERT(2, (
+                  {
+                      enum
+                      {
+                          x,
+                          y,
+                          z,
+                      };
+                      z;
+                  }));
+
     return 0;
 }

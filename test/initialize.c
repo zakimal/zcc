@@ -518,5 +518,7 @@ int main()
                       z;
                   }));
 
+    ASSERT(4, sizeof(struct { int x, y[]; }));
+
     return 0;
 }

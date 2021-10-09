@@ -210,6 +210,7 @@ struct Type
     Token *name;
     int array_len;
     Member *members;
+    bool is_flexible;
     Type *return_ty;
     Type *params;
     Type *next;

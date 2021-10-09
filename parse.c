@@ -274,7 +274,17 @@ static Initializer *new_initializer(Type *ty, bool is_flexible)
 
         for (Member *mem = ty->members; mem; mem = mem->next)
         {
-            init->children[mem->idx] = new_initializer(mem->ty, false);
+            if (is_flexible && ty->is_flexible && !mem->next)
+            {
+                Initializer *child = calloc(1, sizeof(Initializer));
+                child->ty = mem->ty;
+                child->is_flexible = true;
+                init->children[mem->idx] = child;
+            }
+            else
+            {
+                init->children[mem->idx] = new_initializer(mem->ty, false);
+            }
         }
         return init;
     }
@@ -832,6 +842,23 @@ static void array_initializer1(Token **rest, Token *tok, Initializer *init)
     }
 }
 
+static Type *copy_struct_type(Type *ty)
+{
+    ty = copy_type(ty);
+
+    Member head = {};
+    Member *cur = &head;
+    for (Member *mem = ty->members; mem; mem = mem->next)
+    {
+        Member *m = calloc(1, sizeof(Member));
+        *m = *mem;
+        cur = cur->next = m;
+    }
+
+    ty->members = head.next;
+    return ty;
+}
+
 // array-initializer2 = initializer ("," initializer)*
 static void array_initializer2(Token **rest, Token *tok, Initializer *init)
 {
@@ -977,6 +1004,23 @@ static Initializer *initializer(Token **rest, Token *tok, Type *ty, Type **new_t
 {
     Initializer *init = new_initializer(ty, true);
     initializer2(rest, tok, init);
+
+    if ((ty->kind == TY_STRUCT || ty->kind == TY_UNION) && ty->is_flexible)
+    {
+        ty = copy_struct_type(ty);
+
+        Member *mem = ty->members;
+        while (mem->next)
+        {
+            mem = mem->next;
+        }
+        mem->ty = init->children[mem->idx]->ty;
+        ty->size += mem->ty->size;
+
+        *new_ty = ty;
+        return init;
+    }
+
     *new_ty = init->ty;
     return init;
 }
@@ -2096,6 +2140,7 @@ static void struct_members(Token **rest, Token *tok, Type *ty)
     if (cur != &head && cur->ty->kind == TY_ARRAY && cur->ty->array_len < 0)
     {
         cur->ty = array_of(cur->ty->base, 0);
+        ty->is_flexible = true;
     }
 
     *rest = tok->next;

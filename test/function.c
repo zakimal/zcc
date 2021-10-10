@@ -1,6 +1,6 @@
 #include "test.h"
 
-int ret3()
+int ret3(void)
 {
     return 3;
     return 5;
@@ -50,7 +50,7 @@ int sub_short(short a, short b, short c)
 
 int g1;
 
-int *g1_ptr()
+int *g1_ptr(void)
 {
     return &g1;
 }
@@ -75,7 +75,7 @@ _Bool bool_fn_sub(_Bool x)
     return x - 1;
 }
 
-static int static_fn()
+static int static_fn(void)
 {
     return 3;
 }

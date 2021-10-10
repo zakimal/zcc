@@ -368,10 +368,16 @@ static void push_tag_scope(Token *tok, Type *ty)
     scope->tags = sc;
 }
 
-// func-params = (param ("," param)*)? ")"
+// func-params = ("void" | param ("," param)*)? ")"
 // param       = declspec declarator
 static Type *func_params(Token **rest, Token *tok, Type *ty)
 {
+    if (equal(tok, "void") && equal(tok->next, ")"))
+    {
+        *rest = tok->next->next;
+        return func_type(ty);
+    }
+
     Type head = {};
     Type *cur = &head;
 

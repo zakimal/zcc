@@ -554,7 +554,7 @@ static void emit_data(Var *prog)
 {
     for (Var *var = prog; var; var = var->next)
     {
-        if (var->is_function)
+        if (var->is_function || !var->is_definition)
         {
             continue;
         }

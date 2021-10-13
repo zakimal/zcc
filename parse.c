@@ -40,6 +40,7 @@ typedef struct
     bool is_typedef;
     bool is_static;
     bool is_extern;
+    int align;
 } VarAttr;
 
 // This struct represents a variable initializer. Since initializers
@@ -92,11 +93,12 @@ static char *cont_label;
 static Node *current_switch;
 
 static bool is_typename(Token *tok);
+static Type *typename(Token **rest, Token *tok);
 static Type *enum_specifier(Token **rest, Token *tok);
 static Type *type_suffix(Token **rest, Token *tok, Type *ty);
 static Type *declspec(Token **rest, Token *tok, VarAttr *attr);
 static Type *declarator(Token **rest, Token *tok, Type *ty);
-static Node *declaration(Token **rest, Token *tok, Type *basety);
+static Node *declaration(Token **rest, Token *tok, Type *basety, VarAttr *attr);
 static void initializer2(Token **rest, Token *tok, Initializer *init);
 static Initializer *initializer(Token **rest, Token *tok, Type *ty, Type **new_ty);
 static Node *lvar_initializer(Token **rest, Token *tok, Var *var);
@@ -301,6 +303,7 @@ static Var *new_var(char *name, Type *ty)
     Var *var = calloc(1, sizeof(Var));
     var->name = name;
     var->ty = ty;
+    var->align = ty->align;
     push_scope(name)->var = var;
     return var;
 }
@@ -499,6 +502,26 @@ static Type *declspec(Token **rest, Token *tok, VarAttr *attr)
                 error_tok(tok, "typedef may not be used together with static or extern");
             }
             tok = tok->next;
+            continue;
+        }
+
+        if (equal(tok, "_Alignas"))
+        {
+            if (!attr)
+            {
+                error_tok(tok, "_Alignas is not allowed in this context");
+            }
+            tok = skip(tok->next, "(");
+
+            if (is_typename(tok))
+            {
+                attr->align = typename(&tok, tok)->align;
+            }
+            else
+            {
+                attr->align = const_expr(&tok, tok);
+            }
+            tok = skip(tok, ")");
             continue;
         }
 
@@ -741,47 +764,54 @@ static Type *typename(Token **rest, Token *tok)
 }
 
 // declaration = declspec (declarator ("=" expr)? ("," declarator ("=" expr)?)*)? ";"
-static Node *declaration(Token **rest, Token *tok, Type *basety)
+static Node *declaration(Token **rest, Token *tok, Type *basety, VarAttr *attr)
 {
-    Node head = {};
-    Node *cur = &head;
-    int i = 0;
-
-    while (!equal(tok, ";"))
     {
-        if (i++ > 0)
+        Node head = {};
+        Node *cur = &head;
+        int i = 0;
+
+        while (!equal(tok, ";"))
         {
-            tok = skip(tok, ",");
+            if (i++ > 0)
+            {
+                tok = skip(tok, ",");
+            }
+
+            Type *ty = declarator(&tok, tok, basety);
+
+            if (ty->kind == TY_VOID)
+            {
+                error_tok(tok, "variable declared void");
+            }
+            Var *var = new_lvar(get_ident(ty->name), ty);
+
+            if (attr && attr->align)
+            {
+                var->align = attr->align;
+            }
+
+            if (equal(tok, "="))
+            {
+                Node *expr = lvar_initializer(&tok, tok->next, var);
+                cur = cur->next = new_unary(ND_EXPR_STMT, expr, tok);
+            }
+
+            if (var->ty->size < 0)
+            {
+                error_tok(ty->name, "variable has incomplete type");
+            }
+            if (var->ty->kind == TY_VOID)
+            {
+                error_tok(ty->name, "variable declared void");
+            }
         }
 
-        Type *ty = declarator(&tok, tok, basety);
-
-        if (ty->kind == TY_VOID)
-        {
-            error_tok(tok, "variable declared void");
-        }
-        Var *var = new_lvar(get_ident(ty->name), ty);
-
-        if (equal(tok, "="))
-        {
-            Node *expr = lvar_initializer(&tok, tok->next, var);
-            cur = cur->next = new_unary(ND_EXPR_STMT, expr, tok);
-        }
-
-        if (var->ty->size < 0)
-        {
-            error_tok(ty->name, "variable has incomplete type");
-        }
-        if (var->ty->kind == TY_VOID)
-        {
-            error_tok(ty->name, "variable declared void");
-        }
+        Node *node = new_node(ND_BLOCK, tok);
+        node->body = head.next;
+        *rest = tok->next;
+        return node;
     }
-
-    Node *node = new_node(ND_BLOCK, tok);
-    node->body = head.next;
-    *rest = tok->next;
-    return node;
 }
 
 static Token *skip_excess_element(Token *tok)
@@ -1221,6 +1251,7 @@ static bool is_typename(Token *tok)
         "enum",
         "static",
         "extern",
+        "_Alignas",
     };
 
     for (int i = 0; i < sizeof(kw) / sizeof(*kw); i++)
@@ -1340,7 +1371,7 @@ static Node *stmt(Token **rest, Token *tok)
         if (is_typename(tok))
         {
             Type *basety = declspec(&tok, tok, NULL);
-            node->init = declaration(&tok, tok, basety);
+            node->init = declaration(&tok, tok, basety, NULL);
         }
         else
         {
@@ -1469,7 +1500,7 @@ static Node *compound_stmt(Token **rest, Token *tok)
                 continue;
             }
 
-            cur = cur->next = declaration(&tok, tok, basety);
+            cur = cur->next = declaration(&tok, tok, basety, &attr);
         }
         else
         {
@@ -2142,7 +2173,8 @@ static void struct_members(Token **rest, Token *tok, Type *ty)
 
     while (!equal(tok, "}"))
     {
-        Type *basety = declspec(&tok, tok, NULL);
+        VarAttr attr = {};
+        Type *basety = declspec(&tok, tok, &attr);
         bool first = true;
         int i = 0;
 
@@ -2158,6 +2190,7 @@ static void struct_members(Token **rest, Token *tok, Type *ty)
             mem->ty = declarator(&tok, tok, basety);
             mem->name = mem->ty->name;
             mem->idx = idx++;
+            mem->align = attr.align ? attr.align : mem->ty->align;
             cur = cur->next = mem;
         }
     }
@@ -2239,13 +2272,13 @@ static Type *struct_decl(Token **rest, Token *tok)
     int offset = 0;
     for (Member *mem = ty->members; mem; mem = mem->next)
     {
-        offset = align_to(offset, mem->ty->align);
+        offset = align_to(offset, mem->align);
         mem->offset = offset;
         offset += mem->ty->size;
 
-        if (ty->align < mem->ty->align)
+        if (ty->align < mem->align)
         {
-            ty->align = mem->ty->align;
+            ty->align = mem->align;
         }
     }
     ty->size = align_to(offset, ty->align);
@@ -2266,9 +2299,9 @@ static Type *union_decl(Token **rest, Token *tok)
 
     for (Member *mem = ty->members; mem; mem = mem->next)
     {
-        if (ty->align < mem->ty->align)
+        if (ty->align < mem->align)
         {
-            ty->align = mem->ty->align;
+            ty->align = mem->align;
         }
         if (ty->size < mem->ty->size)
         {
@@ -2460,6 +2493,14 @@ static Node *primary(Token **rest, Token *tok)
         return new_num(node->ty->size, tok);
     }
 
+    if (equal(tok, "_Alignof"))
+    {
+        tok = skip(tok->next, "(");
+        Type *ty = typename(&tok, tok);
+        *rest = skip(tok, ")");
+        return new_num(ty->align, tok);
+    }
+
     if (tok->kind == TK_IDENT)
     {
         // Function call
@@ -2598,6 +2639,11 @@ static Token *global_variable(Token *tok, Type *basety, VarAttr *attr)
         Type *ty = declarator(&tok, tok, basety);
         Var *var = new_gvar(get_ident(ty->name), ty);
         var->is_definition = !attr->is_extern;
+        if (attr->align)
+        {
+            var->align = attr->align;
+        }
+
         if (equal(tok, "="))
         {
             gvar_initializer(&tok, tok->next, var);

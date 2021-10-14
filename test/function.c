@@ -85,6 +85,13 @@ int param_decay(int x[])
     return x[0];
 }
 
+int counter()
+{
+    static int i;
+    static int j = 1 + 1;
+    return i++ + j++;
+}
+
 int main()
 {
     ASSERT(3, ret3());
@@ -124,6 +131,10 @@ int main()
                       x[0] = 3;
                       param_decay(x); // passed as *int
                   }));
+
+    ASSERT(2, counter());
+    ASSERT(4, counter());
+    ASSERT(6, counter());
 
     return 0;
 }

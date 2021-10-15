@@ -92,6 +92,11 @@ int counter()
     return i++ + j++;
 }
 
+void return_void()
+{
+    return;
+}
+
 int main()
 {
     ASSERT(3, ret3());
@@ -135,6 +140,8 @@ int main()
     ASSERT(2, counter());
     ASSERT(4, counter());
     ASSERT(6, counter());
+
+    return_void();
 
     return 0;
 }

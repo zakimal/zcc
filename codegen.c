@@ -562,7 +562,14 @@ static void emit_data(Var *prog)
             continue;
         }
 
-        println("  .globl %s", var->name);
+        if (var->is_static)
+        {
+            println("  .local %s", var->name);
+        }
+        else
+        {
+            println("  .globl %s", var->name);
+        }
         println("  .align %d", var->align);
 
         if (var->init_data)

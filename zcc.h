@@ -136,6 +136,7 @@ typedef enum
     ND_RETURN,    // "return"
     ND_IF,        // "if"
     ND_LOOP,      // "for" or "while"
+    ND_DO,        // "do"
     ND_SWITCH,    // "switch"
     ND_CASE,      // "case"
     ND_BLOCK,     // { ... }

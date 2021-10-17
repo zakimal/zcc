@@ -194,6 +194,7 @@ static bool is_keyword(Token *tok)
         "if",
         "else",
         "for",
+        "do",
         "while",
         "int",
         "sizeof",

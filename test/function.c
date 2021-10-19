@@ -102,6 +102,8 @@ _Bool false_fn();
 char char_fn();
 short short_fn();
 
+int add_all(int n, ...);
+
 int main()
 {
     ASSERT(3, ret3());
@@ -152,6 +154,16 @@ int main()
     ASSERT(0, false_fn());
     ASSERT(3, char_fn());
     ASSERT(5, short_fn());
+
+    ASSERT(6, add_all(3, 1, 2, 3));
+    ASSERT(5, add_all(4, 1, 2, 3, -1));
+
+    // ASSERT(0, (
+    //               {
+    //                   char buf[100];
+    //                   sprintf(buf, "%d %d %s", 1, 2, "foo");
+    //                   str_cmp("1 2 foo", buf);
+    //               }));
 
     return 0;
 }

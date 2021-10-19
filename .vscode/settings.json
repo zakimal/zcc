@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "common": "c",
+        "stdarg.h": "c"
+    }
+}

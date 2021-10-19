@@ -215,6 +215,7 @@ struct Type
     bool is_flexible;
     Type *return_ty;
     Type *params;
+    bool is_variadic;
     Type *next;
 };
 

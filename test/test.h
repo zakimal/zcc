@@ -1,7 +1,8 @@
 #define ASSERT(x, y) assert(x, y, #y)
 
 int assert(int expected, int actual, char *code);
-int printf();
+int printf(char *fmt, ...);
+int sprintf(char *buf, char *fmt, ...);
 // int strcmp(char *p, char *q);
 int str_cmp(char *p1, char *p2)
 {

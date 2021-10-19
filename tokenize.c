@@ -153,6 +153,7 @@ static int read_punct(char *p)
         // three characters
         "<<=",
         ">>=",
+        "...",
 
         // two characters
         "==",

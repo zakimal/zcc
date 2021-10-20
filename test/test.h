@@ -3,7 +3,7 @@
 int assert(int expected, int actual, char *code);
 int printf(char *fmt, ...);
 int sprintf(char *buf, char *fmt, ...);
-// int strcmp(char *p, char *q);
+int strcmp(char *p, char *q);
 int str_cmp(char *p1, char *p2)
 {
     for (; *p1 == *p2; p1++, p2++)

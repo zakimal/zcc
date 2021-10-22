@@ -209,6 +209,7 @@ struct Type
     TypeKind kind;
     int size;
     int align;
+    bool is_unsigned;
     Type *base;
     Token *name;
     int array_len;
@@ -235,9 +236,13 @@ struct Member
 extern Type *ty_void;
 extern Type *ty_bool;
 extern Type *ty_char;
+extern Type *ty_short;
 extern Type *ty_int;
 extern Type *ty_long;
-extern Type *ty_short;
+extern Type *ty_uchar;
+extern Type *ty_ushort;
+extern Type *ty_uint;
+extern Type *ty_ulong;
 
 bool is_integer(Type *ty);
 Type *copy_type(Type *ty);

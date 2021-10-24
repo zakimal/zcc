@@ -69,5 +69,8 @@ int main()
     ASSERT(0, (long)(char *)&g4 % 4);
     ASSERT(0, (long)(char *)&g5 % 8);
 
+    ASSERT(1, _Alignof(char) << 31 >> 31);
+    ASSERT(1, _Alignof(char) << 63 >> 63);
+
     return 0;
 }

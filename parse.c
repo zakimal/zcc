@@ -1672,10 +1672,18 @@ static int64_t eval2(Node *node, char **label)
     }
     case ND_DIV:
     {
+        if (node->ty->is_unsigned)
+        {
+            return (uint64_t)eval(node->lhs) / eval(node->rhs);
+        }
         return eval(node->lhs) / eval(node->rhs);
     }
     case ND_MOD:
     {
+        if (node->ty->is_unsigned)
+        {
+            return (uint64_t)eval(node->lhs) % eval(node->rhs);
+        }
         return eval(node->lhs) % eval(node->rhs);
     }
     case ND_BITAND:
@@ -1696,6 +1704,10 @@ static int64_t eval2(Node *node, char **label)
     }
     case ND_SHR:
     {
+        if (node->ty->is_unsigned && node->ty->size == 8)
+        {
+            return (uint64_t)eval(node->lhs) >> eval(node->rhs);
+        }
         return eval(node->lhs) >> eval(node->rhs);
     }
     case ND_EQ:
@@ -1708,10 +1720,18 @@ static int64_t eval2(Node *node, char **label)
     }
     case ND_LT:
     {
+        if (node->lhs->ty->is_unsigned)
+        {
+            return (uint64_t)eval(node->lhs) < eval(node->rhs);
+        }
         return eval(node->lhs) < eval(node->rhs);
     }
     case ND_LE:
     {
+        if (node->lhs->ty->is_unsigned)
+        {
+            return (uint64_t)eval(node->lhs) <= eval(node->rhs);
+        }
         return eval(node->lhs) <= eval(node->rhs);
     }
     case ND_COND:
@@ -1746,11 +1766,11 @@ static int64_t eval2(Node *node, char **label)
             switch (node->ty->size)
             {
             case 1:
-                return (uint8_t)val;
+                return node->ty->is_unsigned ? (uint8_t)val : (int8_t)val;
             case 2:
-                return (uint16_t)val;
+                return node->ty->is_unsigned ? (uint16_t)val : (int16_t)val;
             case 4:
-                return (uint32_t)val;
+                return node->ty->is_unsigned ? (uint32_t)val : (int32_t)val;
             }
         }
         return val;
@@ -2252,7 +2272,7 @@ static Node *unary(Token **rest, Token *tok)
 
     if (equal(tok, "-"))
     {
-        return new_unary(ND_NEG, cast(rest, tok->next), tok);
+        return new_binary(ND_SUB, new_num(0, tok), cast(rest, tok->next), tok);
     }
 
     if (equal(tok, "&"))

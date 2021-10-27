@@ -14,3 +14,4 @@ int str_cmp(char *p1, char *p2)
     return *p1 - *p2;
 }
 int memcmp(char *p, char *q, long n);
+void exit(int n);

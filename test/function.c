@@ -130,6 +130,9 @@ char *fmt(char *buf, char *fmt, ...)
     vsprintf(buf, fmt, ap);
 }
 
+int function_declaration1(int a, char b);
+int function_declaration2(int, char);
+
 int main()
 {
     ASSERT(3, ret3());

@@ -70,6 +70,7 @@ struct Var
     Var *next;
     char *name;    // Variable name
     Type *ty;      // Type
+    Token *tok;    // representative token
     bool is_local; // local or global/function
     int align;     // alignment
 
@@ -212,6 +213,7 @@ struct Type
     bool is_unsigned;
     Type *base;
     Token *name;
+    Token *name_pos;
     int array_len;
     Member *members;
     bool is_flexible;

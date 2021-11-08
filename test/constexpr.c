@@ -1,5 +1,8 @@
 #include "test.h"
 
+float g40 = 1.5;
+double g41 = 0.0 ? 55 : 1 + 1 * 5.0 / 2 * (double)2 * (int)2.0;
+
 int main()
 {
     ASSERT(10, (
@@ -211,6 +214,9 @@ int main()
                       char x[(unsigned)1 <= -1];
                       sizeof(x);
                   }));
+
+    ASSERT(1, g40 == 1.5);
+    ASSERT(1, g41 == 11);
 
     return 0;
 }
